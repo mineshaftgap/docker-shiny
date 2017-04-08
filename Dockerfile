@@ -9,6 +9,8 @@ FROM alpine:3.5
 ################################################################################
 ENV LANG=C.UTF-8
 
+COPY shiny-server.sh /usr/bin/shiny-server.sh
+
 RUN \
   ALPINE_GLIBC_BASE_URL="https://github.com/sgerrand/alpine-pkg-glibc/releases/download" && \
   ALPINE_GLIBC_PACKAGE_VERSION="2.25-r0" && \
