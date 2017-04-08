@@ -59,3 +59,5 @@ RUN \
   (cd .. && ./bin/npm --python="$PYTHON" install) && \
   (cd .. && ./bin/node ./ext/node/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js --python="$PYTHON" rebuild) && \
   apk del .build-dependencies2
+
+ENTRYPOINT ["/usr/bin/shiny-server.sh"]
