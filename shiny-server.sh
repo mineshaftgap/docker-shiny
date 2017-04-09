@@ -1,10 +1,8 @@
 #!/bin/sh
 
-# Make sure the directory for individual app logs exists
-mkdir -p /var/log/shiny-server
-chown shiny.shiny /var/log/shiny-server
-
-# make this file owned by root in container so that certs can be added
+# self signed certs need this owned by root
 chown root.root /etc/ca-certificates.conf
 
-exec shiny-server 2>&1
+/bin/su -l shiny -s /bin/sh -c /usr/bin/shiny-server 2>&1
+
+# exec shiny-server 2>&1
