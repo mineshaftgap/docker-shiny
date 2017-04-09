@@ -1,23 +1,36 @@
 FROM alpine:3.5
 
+ENV LANG=C.UTF-8
+
+COPY shiny-server.sh /usr/bin/shiny-server.sh
+COPY shiny-server.conf /etc/shiny-server/shiny-server.conf
+
 ################################################################################
-# 1. SETUP GLIBC
+# 0. General setup
+################################################################################
+RUN \
+  date && \
+  GROUP999=$(grep 999 /etc/group) &&\
+  if [ -n "$GROUP999" ]; then delgroup $(echo $GROUP999|cut -f1 -d:); fi && \
+  adduser -h /home/shiny -s /sbin/nologin -D -H -u 999 shiny && \
+  mkdir ~/.R /home/shiny && \
+  chown shiny.shiny /home/shiny && \
+  echo "CFLAGS = -D__USE_MISC" > ~/.R/Makevars && \
+  apk add --no-cache bash libstdc++ R && \
+  apk add --no-cache --virtual=.build-dependencies ca-certificates cmake gcc g++ git linux-headers R-dev python unzip wget && \
+
+################################################################################
+# 1. GLIBC setup
 #
 ################################################################################
 # blatantly stolen from: https://github.com/frol/docker-alpine-glibc
 #   Here we install GNU libc (aka glibc) and set C.UTF-8 locale as default.
 ################################################################################
-ENV LANG=C.UTF-8
-
-COPY shiny-server.sh /usr/bin/shiny-server.sh
-
-RUN \
   ALPINE_GLIBC_BASE_URL="https://github.com/sgerrand/alpine-pkg-glibc/releases/download" && \
   ALPINE_GLIBC_PACKAGE_VERSION="2.25-r0" && \
   ALPINE_GLIBC_BASE_PACKAGE_FILENAME="glibc-$ALPINE_GLIBC_PACKAGE_VERSION.apk" && \
   ALPINE_GLIBC_BIN_PACKAGE_FILENAME="glibc-bin-$ALPINE_GLIBC_PACKAGE_VERSION.apk" && \
   ALPINE_GLIBC_I18N_PACKAGE_FILENAME="glibc-i18n-$ALPINE_GLIBC_PACKAGE_VERSION.apk" && \
-  apk add --no-cache --virtual=.build-dependencies wget ca-certificates && \
   wget \
       "https://raw.githubusercontent.com/andyshinn/alpine-pkg-glibc/master/sgerrand.rsa.pub" \
       -O "/etc/apk/keys/sgerrand.rsa.pub" && \
@@ -37,16 +50,15 @@ RUN \
   apk del glibc-i18n && \
   \
   rm "/root/.wget-hsts" && \
-  apk del .build-dependencies && \
   rm \
       "$ALPINE_GLIBC_BASE_PACKAGE_FILENAME" \
       "$ALPINE_GLIBC_BIN_PACKAGE_FILENAME" \
       "$ALPINE_GLIBC_I18N_PACKAGE_FILENAME" && \
+
 ################################################################################
-# 2. SETUP SHINY
+# 2. SHINY setup
 #    https://github.com/rstudio/shiny-server/wiki/Building-Shiny-Server-from-Source
 ################################################################################
-  apk add --no-cache --virtual=.build-dependencies2 bash cmake gcc g++ git linux-headers R-dev python unzip && \
   cd /usr/local && \
   git clone https://github.com/rstudio/shiny-server.git && \
   mkdir -p /usr/local/shiny-server/tmp && \
@@ -58,6 +70,16 @@ RUN \
   mkdir ../build && \
   (cd .. && ./bin/npm --python="$PYTHON" install) && \
   (cd .. && ./bin/node ./ext/node/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js --python="$PYTHON" rebuild) && \
-  apk del .build-dependencies2
+  make install && \
+  ln -s /usr/local/shiny-server/bin/shiny-server /usr/bin/shiny-server && \
+  mkdir -p /var/log/shiny-server /srv/shiny-server /var/lib/shiny-server /etc/shiny-server /var/lib/shiny-server/bookmarks/shiny && \
+  chown shiny /var/log/shiny-server && \
+  R -e "install.packages('shiny', repos='https://cran.rstudio.com/')" R && \
+
+################################################################################
+# 3. Build cleanup
+################################################################################
+  apk del .build-dependencies && \
+  date
 
 ENTRYPOINT ["/usr/bin/shiny-server.sh"]
