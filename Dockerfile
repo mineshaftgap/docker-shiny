@@ -79,6 +79,10 @@ RUN \
 ################################################################################
 # 3. Build cleanup
 ################################################################################
+  cd /usr/local/shiny-server/external/node/node-v6.10.0 && \
+  make clean && \
+  rm -rf /usr/local/shiny-server/tmp /root/.node-gyp /root/.npm && \
+  find / -type f -perm /u=x,g=x,o=x -xdev -exec strip -v {} \; && \
   apk del .build-dependencies && \
   date
 
