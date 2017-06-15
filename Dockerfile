@@ -16,7 +16,7 @@ RUN \
   mkdir ~/.R /home/shiny && \
   chown shiny.shiny /home/shiny && \
   echo "CFLAGS = -D__USE_MISC" > ~/.R/Makevars && \
-  apk add --no-cache bash libstdc++ R && \
+  apk add --no-cache bash libstdc++ R freetype fontconfig ttf-dejavu && \
   apk add --no-cache --virtual=.build-dependencies ca-certificates cmake gcc g++ git linux-headers R-dev python unzip wget && \
 
 ################################################################################
@@ -77,7 +77,12 @@ RUN \
   R -e "install.packages('shiny', repos='https://cran.rstudio.com/')" R && \
 
 ################################################################################
-# 3. Build cleanup
+# 3. Extra SHINY font setup
+################################################################################
+  R -e "install.packages(c('Rttf2pt1', 'extrafontdb', 'extrafont'), repos='https://cran.rstudio.com/')" R && \
+
+################################################################################
+# 4. Build cleanup
 ################################################################################
   cd /usr/local/shiny-server/external/node/node-v6.10.0 && \
   make clean && \
