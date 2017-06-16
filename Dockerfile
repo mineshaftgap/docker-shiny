@@ -79,7 +79,7 @@ RUN \
 ################################################################################
 # 3. Extra SHINY font setup
 ################################################################################
-  R -e "install.packages(c('Rttf2pt1', 'extrafontdb', 'extrafont'), repos='https://cran.rstudio.com/')" R && \
+  R -e "install.packages(c('Rttf2pt1', 'extrafontdb', 'extrafont'), repos='https://cran.rstudio.com/');Sys.setlocale('LC_ALL','C');library(extrafont);font_import(prompt=FALSE)" && \
 
 ################################################################################
 # 4. Build cleanup
