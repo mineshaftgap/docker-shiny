@@ -16,7 +16,7 @@ RUN \
   mkdir ~/.R /home/shiny && \
   chown shiny.shiny /home/shiny && \
   echo "CFLAGS = -D__USE_MISC" > ~/.R/Makevars && \
-  apk add --no-cache bash libstdc++ R freetype fontconfig ttf-dejavu && \
+  apk add --no-cache bash libstdc++ R freetype fontconfig ttf-dejavu libxml2 && \
   apk add --no-cache --virtual=.build-dependencies ca-certificates cmake gcc g++ git linux-headers R-dev python unzip wget && \
 
 ################################################################################
