@@ -59,8 +59,12 @@ RUN \
 # 2. SHINY setup
 #    https://github.com/rstudio/shiny-server/wiki/Building-Shiny-Server-from-Source
 ################################################################################
+
   cd /usr/local && \
   git clone https://github.com/rstudio/shiny-server.git && \
+
+  sed -i.bak "s/b94f751c2b5023bb9b812ecb5211d7d1/9d53413f3d69fbf0bd369f5cebb7dc8b/" CMakeLists.txt && \
+
   mkdir -p /usr/local/shiny-server/tmp && \
   cd /usr/local/shiny-server/tmp && \
   PATH=$(pwd)/../bin:$PATH && \
