@@ -1,3 +1,3 @@
 # docker-shiny
 
-updated 2017-04-07
+updated 2017-07-01
